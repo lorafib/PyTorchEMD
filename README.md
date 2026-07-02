@@ -61,7 +61,7 @@ The legacy import path is still available:
 from emd import earth_mover_distance
 ```
 
-Run the CUDA smoke test with:
+Run the test with:
 
 ```bash
 python test_emd_loss.py
