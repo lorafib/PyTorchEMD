@@ -12,6 +12,7 @@ from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 setup(
     name='emd_ext',
+    py_modules=['earth_mover_distance', 'emd'],
     ext_modules=[
         CUDAExtension(
             name='emd_cuda',

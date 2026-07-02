@@ -1,31 +1,79 @@
-# PyTorch Wrapper for Point-cloud Earth-Mover-Distance (EMD)
+# PyTorchEMD
 
-## Dependency
+PyTorch wrapper for approximate point-cloud Earth Mover's Distance (EMD).
 
-The code has been tested on PyTorch 2.4.1, CUDA 12.8.
+This fork keeps the original CUDA extension interface, updates the extension
+for newer PyTorch/CUDA builds, normalizes the returned cost per source point,
+and adds optional point limiting before calling the dense CUDA matcher.
+
+## Requirements
+
+- PyTorch with CUDA support
+- A CUDA toolkit compatible with the active PyTorch installation
+- A compiler toolchain supported by `torch.utils.cpp_extension`
+
+This fork has been used with PyTorch 2.4.1 and CUDA 12.x.
+
+## Installation
+
+From this repository root:
+
+```bash
+pip install -e .
+```
+
+For local source-tree use without installing the Python modules, build the CUDA
+extension in place and keep this directory on `PYTHONPATH`:
+
+```bash
+python setup.py build_ext --inplace
+```
+
+The previous manual step of copying `emd_cuda*.so` out of `build/lib...` is no
+longer required.
 
 ## Usage
 
-First compile using
-        
-        python setup.py install
+```python
+from earth_mover_distance import earth_mover_distance
 
-Then, copy the lib file out to the main directory,
+d = earth_mover_distance(p1, p2, transpose=False, point_limit=2048)
+```
 
-        cp build/lib.linux-x86_64-3.6/emd_cuda.cpython-36m-x86_64-linux-gnu.so .
+Input shapes:
 
-Then, you can use it by simply
+- `transpose=False`: `p1` and `p2` are expected as `B x N x 3`.
+- `transpose=True`: `p1` and `p2` are expected as `B x 3 x N` and are
+  transposed before calling the CUDA extension.
 
-        from emd import earth_mover_distance
-        d = earth_mover_distance(p1, p2, transpose=False)  # p1: B x N1 x 3, p2: B x N2 x 3
+`point_limit` is optional. If set to a positive integer, point clouds larger
+than the limit are deterministically downsampled before EMD is computed, and a
+warning is emitted. Use `point_limit=None` or `point_limit <= 0` to disable
+limiting.
 
-Check `test_emd_loss.py` for example.
+The returned cost is normalized by the number of source points.
 
-## Author
+The legacy import path is still available:
 
-The cuda code is originally written by Haoqiang Fan. The PyTorch wrapper is written by Kaichun Mo. Also, Jiayuan Gu provided helps.
+```python
+from emd import earth_mover_distance
+```
+
+Run the CUDA smoke test with:
+
+```bash
+python test_emd_loss.py
+```
+
+## Attribution
+
+This fork is based on the original
+[daerduoCarey/PyTorchEMD](https://github.com/daerduoCarey/PyTorchEMD)
+repository.
+
+The CUDA code was originally written by Haoqiang Fan. The PyTorch wrapper was
+written by Kaichun Mo, with help from Jiayuan Gu.
 
 ## License
 
 MIT
-
