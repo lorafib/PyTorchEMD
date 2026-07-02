@@ -1,6 +1,7 @@
 import torch
 import numpy as np
-from emd import earth_mover_distance
+import warnings
+from earth_mover_distance import earth_mover_distance
 
 
 if not torch.cuda.is_available():
@@ -43,6 +44,14 @@ emd_dist = earth_mover_distance(emd_p1, emd_p2, transpose=False)
 emd_loss = (emd_dist * weights).sum()
 emd_loss.backward()
 
+with warnings.catch_warnings(record=True) as caught_warnings:
+    warnings.simplefilter("always")
+    limited_dist = earth_mover_distance(emd_p1, emd_p2, transpose=False, point_limit=1)
+
+assert len(caught_warnings) == 2
+assert all("Downsampling" in str(warning.message) for warning in caught_warnings)
+assert tuple(limited_dist.shape) == (3,)
+
 torch.testing.assert_close(emd_dist, expected_dist, rtol=1e-5, atol=1e-5)
 torch.testing.assert_close(emd_loss, expected_loss, rtol=1e-5, atol=1e-5)
 torch.testing.assert_close(emd_p1.grad, expected_p1.grad, rtol=1e-5, atol=1e-5)
@@ -63,5 +72,9 @@ print()
 print("Gradient check:")
 print(f"  p1 max abs diff: {(emd_p1.grad - expected_p1.grad).abs().max().detach().cpu().item():.6e}")
 print(f"  p2 max abs diff: {(emd_p2.grad - expected_p2.grad).abs().max().detach().cpu().item():.6e}")
+print()
+print("Point limit check:")
+print(f"  limited output shape: {tuple(limited_dist.shape)}")
+print(f"  warnings: {[str(warning.message) for warning in caught_warnings]}")
 print()
 print("OK")
