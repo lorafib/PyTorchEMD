@@ -2,9 +2,11 @@
 
 PyTorch wrapper for approximate point-cloud Earth Mover's Distance (EMD).
 
-This fork keeps the original CUDA extension interface, updates the extension
-for newer PyTorch/CUDA builds, normalizes the returned cost per source point,
-and adds optional point limiting before calling the dense CUDA matcher.
+Key changes fo this fork:
+- works for newer PyTorch/CUDA builds
+- normalizes the returned cost per source point
+- optional point limiting (memory scales quadratically with point sizes)
+
 
 ## Requirements
 
