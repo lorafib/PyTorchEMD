@@ -2,7 +2,7 @@
 
 ## Dependency
 
-The code has been tested on Ubuntu 16.04, PyTorch 1.1.0, CUDA 9.0.
+The code has been tested on PyTorch 2.4.1, CUDA 12.8.
 
 ## Usage
 
